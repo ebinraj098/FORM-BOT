@@ -1,0 +1,112 @@
+// ---------------------------
+// Green Energy FarmBot
+// Solar-Powered Smart Farming Robot
+// ---------------------------
+
+#include <LiquidCrystal.h>
+
+// LCD Pins: RS, E, D4, D5, D6, D7
+LiquidCrystal lcd(7, 6, 5, 4, 3, 2);
+
+// Motor Driver L298N Pins
+#define ENA 9
+#define IN1 8
+#define IN2 10
+#define IN3 11
+#define IN4 12
+#define ENB 13
+
+// Soil Moisture and Relay
+#define SOIL A0
+#define RELAY A1
+
+int soilValue = 0;
+int threshold = 500; // adjustable based on soil type
+
+void setup() {
+  Serial.begin(9600);
+  lcd.begin(16, 2);
+  lcd.setCursor(0,0);
+  lcd.print("  FARM BOT INIT  ");
+  delay(2000);
+  lcd.clear();
+
+  pinMode(RELAY, OUTPUT);
+  pinMode(ENA, OUTPUT);
+  pinMode(ENB, OUTPUT);
+  pinMode(IN1, OUTPUT);
+  pinMode(IN2, OUTPUT);
+  pinMode(IN3, OUTPUT);
+  pinMode(IN4, OUTPUT);
+
+  digitalWrite(RELAY, LOW);
+}
+
+void loop() {
+  soilValue = analogRead(SOIL);
+  Serial.print("Soil Value: ");
+  Serial.println(soilValue);
+
+  lcd.setCursor(0, 0);
+  lcd.print("Soil: ");
+  lcd.print(soilValue);
+  lcd.print("   ");
+
+  if (soilValue > threshold) {
+    lcd.setCursor(0, 1);
+    lcd.print("Dry Soil - Pump ON ");
+    digitalWrite(RELAY, HIGH); // activate pump
+  } else {
+    lcd.setCursor(0, 1);
+    lcd.print("Wet Soil - Pump OFF");
+    digitalWrite(RELAY, LOW); // deactivate pump
+  }
+
+  delay(2000);
+
+  // Simple robot movement demo
+  moveForward(1500);
+  stopBot(500);
+  moveLeft(1000);
+  stopBot(500);
+  moveBackward(1500);
+  stopBot(500);
+}
+
+void moveForward(int t) {
+  digitalWrite(IN1, HIGH);
+  digitalWrite(IN2, LOW);
+  digitalWrite(IN3, HIGH);
+  digitalWrite(IN4, LOW);
+  analogWrite(ENA, 200);
+  analogWrite(ENB, 200);
+  delay(t);
+}
+
+void moveBackward(int t) {
+  digitalWrite(IN1, LOW);
+  digitalWrite(IN2, HIGH);
+  digitalWrite(IN3, LOW);
+  digitalWrite(IN4, HIGH);
+  analogWrite(ENA, 200);
+  analogWrite(ENB, 200);
+  delay(t);
+}
+
+void moveLeft(int t) {
+  digitalWrite(IN1, LOW);
+  digitalWrite(IN2, HIGH);
+  digitalWrite(IN3, HIGH);
+  digitalWrite(IN4, LOW);
+  analogWrite(ENA, 200);
+  analogWrite(ENB, 200);
+  delay(t);
+}
+
+void stopBot(int t) {
+  digitalWrite(IN1, LOW);
+  digitalWrite(IN2, LOW);
+  digitalWrite(IN3, LOW);
+  digitalWrite(IN4, LOW);
+  delay(t);
+}
